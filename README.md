@@ -9,20 +9,19 @@ Supports every AdMob format: **banner** (adaptive, inline adaptive, fixed
 sizes), **native** (Google templates), **interstitial**, **rewarded**,
 **rewarded interstitial** and **app open**. Android and iOS.
 
-> Private package. Not published on pub.dev.
+> Unofficial wrapper around [`google_mobile_ads`](https://pub.dev/packages/google_mobile_ads). Not affiliated with or
+> endorsed by Google. You still need your own AdMob account and must follow the
+> [AdMob program policies](https://support.google.com/admob/answer/6128543).
 
-## Install (private GitHub repo)
+## Install
 
 ```yaml
 dependencies:
-  safe_ads:
-    git:
-      url: https://github.com/Nikilsuthar/safe_ads.git
-      ref: v0.1.0        # always pin a tag
+  safe_ads: ^0.1.0
 ```
 
-`flutter pub get` uses your normal git credentials (HTTPS login /
-`gh auth login`).
+(Before it is on pub.dev you can use the git form:
+`safe_ads: {git: {url: https://github.com/Nikilsuthar/safe_ads.git, ref: v0.1.0}}`.)
 
 Android: add your **AdMob app id** to `AndroidManifest.xml` (inside
 `<application>`; Google's test id shown):

@@ -4,7 +4,14 @@ description: >-
   rewarded, rewarded interstitial and app-open ads with built-in consent (UMP),
   request budgets, capped retries, cooldowns, banner reuse and ad logging.
 version: 0.1.0
-publish_to: none
+repository: https://github.com/Nikilsuthar/safe_ads
+issue_tracker: https://github.com/Nikilsuthar/safe_ads/issues
+topics:
+  - admob
+  - ads
+  - monetization
+  - google-mobile-ads
+  - consent
 
 environment:
   sdk: ^3.6.1
