@@ -10,7 +10,12 @@ Future<void> main() async {
       ids: AdIds(), // empty on purpose: test ids are used
       useTestIds: true,
       logToConsole: true,
-      autoPreload: {AdFormat.interstitial, AdFormat.rewarded, AdFormat.rewardedInterstitial, AdFormat.appOpen},
+      autoPreload: {
+        AdFormat.interstitial,
+        AdFormat.rewarded,
+        AdFormat.rewardedInterstitial,
+        AdFormat.appOpen
+      },
       // Shorter than the defaults so the bench can be exercised quickly.
       policy: AdPolicy(
         launchGrace: Duration(seconds: 10),
@@ -75,8 +80,10 @@ class _BenchState extends State<Bench> {
       body: ListView(
         padding: const EdgeInsets.all(12),
         children: [
-          Text('SDK ready: $ready   ·   ${SafeAds.stats.totalRequests} requests so far'),
-          Text(SafeAds.stats.summary(), style: const TextStyle(fontFamily: 'monospace', fontSize: 11)),
+          Text(
+              'SDK ready: $ready   ·   ${SafeAds.stats.totalRequests} requests so far'),
+          Text(SafeAds.stats.summary(),
+              style: const TextStyle(fontFamily: 'monospace', fontSize: 11)),
           const SizedBox(height: 8),
           Wrap(spacing: 8, runSpacing: 8, children: [
             FilledButton(
@@ -100,7 +107,8 @@ class _BenchState extends State<Bench> {
               onPressed: () async {
                 final r = await SafeAds.showRewarded(
                   placement: 'bench',
-                  onReward: (reward) => _say('reward earned: ${reward.amount} ${reward.type}'),
+                  onReward: (reward) =>
+                      _say('reward earned: ${reward.amount} ${reward.type}'),
                   onNotAvailable: () => _say('rewarded not ready yet'),
                 );
                 if (!r.shown) _say('rewarded -> $r');
@@ -111,14 +119,16 @@ class _BenchState extends State<Bench> {
               onPressed: () async {
                 final r = await SafeAds.showRewardedInterstitial(
                   placement: 'bench',
-                  onReward: (reward) => _say('reward earned: ${reward.amount} ${reward.type}'),
+                  onReward: (reward) =>
+                      _say('reward earned: ${reward.amount} ${reward.type}'),
                 );
                 if (!r.shown) _say('rewarded interstitial -> $r');
               },
               child: const Text('Rewarded interstitial'),
             ),
             FilledButton(
-              onPressed: () async => _say('app open -> ${await SafeAds.showAppOpen(placement: 'bench')}'),
+              onPressed: () async => _say(
+                  'app open -> ${await SafeAds.showAppOpen(placement: 'bench')}'),
               child: const Text('App open'),
             ),
             OutlinedButton(
@@ -127,13 +137,17 @@ class _BenchState extends State<Bench> {
             ),
           ]),
           const SizedBox(height: 8),
-          Text('Status: $_status', style: const TextStyle(fontWeight: FontWeight.bold)),
+          Text('Status: $_status',
+              style: const TextStyle(fontWeight: FontWeight.bold)),
           const SizedBox(height: 8),
           const Text('Native ad (medium):'),
           const SafeNativeAd(placement: 'bench-native'),
           const SizedBox(height: 12),
           const Text('Event log (newest first):'),
-          for (final line in _log) Text(line, style: const TextStyle(fontFamily: 'monospace', fontSize: 10.5)),
+          for (final line in _log)
+            Text(line,
+                style:
+                    const TextStyle(fontFamily: 'monospace', fontSize: 10.5)),
         ],
       ),
     );

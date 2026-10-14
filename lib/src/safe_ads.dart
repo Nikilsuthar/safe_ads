@@ -51,7 +51,8 @@ class SafeAds {
   static Stream<AdEvent> get events => _core?.events ?? const Stream.empty();
 
   /// The last events, newest last (for an in-app debug screen).
-  static List<AdEvent> get recentEvents => List.unmodifiable(_core?.recentEvents ?? const <AdEvent>[]);
+  static List<AdEvent> get recentEvents =>
+      List.unmodifiable(_core?.recentEvents ?? const <AdEvent>[]);
 
   static AdStats get stats => _core?.stats ?? AdStats();
 
@@ -59,7 +60,8 @@ class SafeAds {
   /// background and [ready] flips to true when ads may be requested.
   static Future<void> init(SafeAdsConfig config) async {
     if (_core != null) return;
-    final core = SafeAdsCore(config, readyNotifier: _ready, privacyNotifier: _privacy);
+    final core =
+        SafeAdsCore(config, readyNotifier: _ready, privacyNotifier: _privacy);
     _core = core;
 
     AdStorage storage = MemoryAdStorage();
@@ -73,10 +75,12 @@ class SafeAds {
     core.gate = InterstitialGate(policy: config.policy, storage: storage);
 
     if (!config.enabled) {
-      core.log(AdEventType.info, null, detail: 'disabled by config - no ads will be requested');
+      core.log(AdEventType.info, null,
+          detail: 'disabled by config - no ads will be requested');
       return;
     }
-    core.log(AdEventType.info, null, detail: 'init (testIds=${config.useTestIds})');
+    core.log(AdEventType.info, null,
+        detail: 'init (testIds=${config.useTestIds})');
     unawaited(_start(core));
   }
 
@@ -85,10 +89,12 @@ class SafeAds {
       var allowed = true;
       if (core.config.consent == ConsentMode.umpIfRequired) {
         allowed = await ConsentManager.gather();
-        core.privacyOptionsRequired.value = await ConsentManager.privacyOptionsRequired();
+        core.privacyOptionsRequired.value =
+            await ConsentManager.privacyOptionsRequired();
       }
       if (!allowed) {
-        core.log(AdEventType.info, null, detail: 'consent does not allow ads (yet)');
+        core.log(AdEventType.info, null,
+            detail: 'consent does not allow ads (yet)');
         return;
       }
       await _initSdk(core);
@@ -202,7 +208,8 @@ class SafeAds {
     VoidCallback? onClosed,
     VoidCallback? onFinished,
   }) {
-    return _guarded(AdFormat.interstitial, placement, onFinished, (core, finish) async {
+    return _guarded(AdFormat.interstitial, placement, onFinished,
+        (core, finish) async {
       final slot = _interstitial;
       if (slot == null) return const AdResult.skipped(AdSkipReason.noAdUnit);
       if (core.fullScreenShowing || _justDismissed(core)) {
@@ -235,11 +242,15 @@ class SafeAds {
     VoidCallback? onNotAvailable,
     VoidCallback? onFinished,
   }) {
-    return _guarded(AdFormat.rewarded, placement, onFinished, (core, finish) async {
+    return _guarded(AdFormat.rewarded, placement, onFinished,
+        (core, finish) async {
       final slot = _rewarded;
       if (slot == null) return const AdResult.skipped(AdSkipReason.noAdUnit);
-      if (core.fullScreenShowing) return const AdResult.skipped(AdSkipReason.alreadyShowing);
-      final result = await _present<RewardedAd>(core, slot, AdFormat.rewarded, placement,
+      if (core.fullScreenShowing) {
+        return const AdResult.skipped(AdSkipReason.alreadyShowing);
+      }
+      final result = await _present<RewardedAd>(
+          core, slot, AdFormat.rewarded, placement,
           onShown: onShown, onClosed: onClosed, onReward: onReward);
       if (result.skipReason == AdSkipReason.notReady) onNotAvailable?.call();
       return result;
@@ -255,10 +266,13 @@ class SafeAds {
     VoidCallback? onNotAvailable,
     VoidCallback? onFinished,
   }) {
-    return _guarded(AdFormat.rewardedInterstitial, placement, onFinished, (core, finish) async {
+    return _guarded(AdFormat.rewardedInterstitial, placement, onFinished,
+        (core, finish) async {
       final slot = _rewardedInterstitial;
       if (slot == null) return const AdResult.skipped(AdSkipReason.noAdUnit);
-      if (core.fullScreenShowing) return const AdResult.skipped(AdSkipReason.alreadyShowing);
+      if (core.fullScreenShowing) {
+        return const AdResult.skipped(AdSkipReason.alreadyShowing);
+      }
       final result = await _present<RewardedInterstitialAd>(
           core, slot, AdFormat.rewardedInterstitial, placement,
           onShown: onShown, onClosed: onClosed, onReward: onReward);
@@ -274,14 +288,16 @@ class SafeAds {
     VoidCallback? onClosed,
     VoidCallback? onFinished,
   }) {
-    return _guarded(AdFormat.appOpen, placement, onFinished, (core, finish) async {
+    return _guarded(AdFormat.appOpen, placement, onFinished,
+        (core, finish) async {
       final slot = _appOpen;
       if (slot == null) return const AdResult.skipped(AdSkipReason.noAdUnit);
       if (core.fullScreenShowing || _justDismissed(core)) {
         return const AdResult.skipped(AdSkipReason.alreadyShowing);
       }
       final last = _lastAppOpenShownAt;
-      if (last != null && core.now().difference(last) < core.policy.appOpenMinInterval) {
+      if (last != null &&
+          core.now().difference(last) < core.policy.appOpenMinInterval) {
         return const AdResult.skipped(AdSkipReason.cooldown);
       }
       return _present<AppOpenAd>(core, slot, AdFormat.appOpen, placement,
@@ -313,15 +329,19 @@ class SafeAds {
 
     final core = _core;
     try {
-      if (core == null || !core.config.enabled) return const AdResult.skipped(AdSkipReason.disabled);
+      if (core == null || !core.config.enabled) {
+        return const AdResult.skipped(AdSkipReason.disabled);
+      }
       if (!core.canRequest) {
-        core.log(AdEventType.skipped, format, placement: placement, detail: 'SDK not ready yet');
+        core.log(AdEventType.skipped, format,
+            placement: placement, detail: 'SDK not ready yet');
         return const AdResult.skipped(AdSkipReason.notReady);
       }
       final result = await body(core, finish);
       if (!result.shown) {
         core.log(AdEventType.skipped, format,
-            placement: placement, detail: result.skipReason?.name ?? result.error);
+            placement: placement,
+            detail: result.skipReason?.name ?? result.error);
       }
       return result;
     } finally {
@@ -363,27 +383,35 @@ class SafeAds {
             core.log(AdEventType.shown, format, placement: placement);
             onShown?.call();
           },
-          onImpression: () => core.log(AdEventType.impression, format, placement: placement),
-          onClicked: () => core.log(AdEventType.clicked, format, placement: placement),
+          onImpression: () =>
+              core.log(AdEventType.impression, format, placement: placement),
+          onClicked: () =>
+              core.log(AdEventType.clicked, format, placement: placement),
           onReward: onReward == null
               ? null
               : (reward) {
                   rewarded = true;
                   core.log(AdEventType.reward, format,
-                      placement: placement, detail: '${reward.amount} ${reward.type}');
+                      placement: placement,
+                      detail: '${reward.amount} ${reward.type}');
                   onReward(reward);
                 },
           onDismissed: () {
             leave();
             core.log(AdEventType.dismissed, format, placement: placement);
             onClosed?.call();
-            if (!done.isCompleted) done.complete(AdResult.shown(rewarded: rewarded));
+            if (!done.isCompleted) {
+              done.complete(AdResult.shown(rewarded: rewarded));
+            }
           },
           onFailed: (error) {
             leave();
             core.log(AdEventType.failed, format,
-                placement: placement, detail: 'failed to show: ${error.message}');
-            if (!done.isCompleted) done.complete(AdResult.failed(error.message));
+                placement: placement,
+                detail: 'failed to show: ${error.message}');
+            if (!done.isCompleted) {
+              done.complete(AdResult.failed(error.message));
+            }
           },
         ),
       );
@@ -410,10 +438,12 @@ class SafeAds {
             load: (id, request, ok, fail) => InterstitialAd.load(
               adUnitId: id,
               request: request,
-              adLoadCallback: InterstitialAdLoadCallback(onAdLoaded: ok, onAdFailedToLoad: fail),
+              adLoadCallback: InterstitialAdLoadCallback(
+                  onAdLoaded: ok, onAdFailedToLoad: fail),
             ),
             present: (ad, cb) {
-              ad.fullScreenContentCallback = FullScreenContentCallback<InterstitialAd>(
+              ad.fullScreenContentCallback =
+                  FullScreenContentCallback<InterstitialAd>(
                 onAdShowedFullScreenContent: (_) => cb.onShown(),
                 onAdDismissedFullScreenContent: (_) => cb.onDismissed(),
                 onAdFailedToShowFullScreenContent: (_, e) => cb.onFailed(e),
@@ -434,17 +464,20 @@ class SafeAds {
             load: (id, request, ok, fail) => RewardedAd.load(
               adUnitId: id,
               request: request,
-              rewardedAdLoadCallback: RewardedAdLoadCallback(onAdLoaded: ok, onAdFailedToLoad: fail),
+              rewardedAdLoadCallback: RewardedAdLoadCallback(
+                  onAdLoaded: ok, onAdFailedToLoad: fail),
             ),
             present: (ad, cb) {
-              ad.fullScreenContentCallback = FullScreenContentCallback<RewardedAd>(
+              ad.fullScreenContentCallback =
+                  FullScreenContentCallback<RewardedAd>(
                 onAdShowedFullScreenContent: (_) => cb.onShown(),
                 onAdDismissedFullScreenContent: (_) => cb.onDismissed(),
                 onAdFailedToShowFullScreenContent: (_, e) => cb.onFailed(e),
                 onAdClicked: (_) => cb.onClicked(),
                 onAdImpression: (_) => cb.onImpression(),
               );
-              return ad.show(onUserEarnedReward: (_, reward) => cb.onReward?.call(reward));
+              return ad.show(
+                  onUserEarnedReward: (_, reward) => cb.onReward?.call(reward));
             },
             disposeAd: (ad) => ad.dispose(),
           );
@@ -459,17 +492,20 @@ class SafeAds {
               adUnitId: id,
               request: request,
               rewardedInterstitialAdLoadCallback:
-                  RewardedInterstitialAdLoadCallback(onAdLoaded: ok, onAdFailedToLoad: fail),
+                  RewardedInterstitialAdLoadCallback(
+                      onAdLoaded: ok, onAdFailedToLoad: fail),
             ),
             present: (ad, cb) {
-              ad.fullScreenContentCallback = FullScreenContentCallback<RewardedInterstitialAd>(
+              ad.fullScreenContentCallback =
+                  FullScreenContentCallback<RewardedInterstitialAd>(
                 onAdShowedFullScreenContent: (_) => cb.onShown(),
                 onAdDismissedFullScreenContent: (_) => cb.onDismissed(),
                 onAdFailedToShowFullScreenContent: (_, e) => cb.onFailed(e),
                 onAdClicked: (_) => cb.onClicked(),
                 onAdImpression: (_) => cb.onImpression(),
               );
-              return ad.show(onUserEarnedReward: (_, reward) => cb.onReward?.call(reward));
+              return ad.show(
+                  onUserEarnedReward: (_, reward) => cb.onReward?.call(reward));
             },
             disposeAd: (ad) => ad.dispose(),
           );
@@ -483,10 +519,12 @@ class SafeAds {
             load: (id, request, ok, fail) => AppOpenAd.load(
               adUnitId: id,
               request: request,
-              adLoadCallback: AppOpenAdLoadCallback(onAdLoaded: ok, onAdFailedToLoad: fail),
+              adLoadCallback:
+                  AppOpenAdLoadCallback(onAdLoaded: ok, onAdFailedToLoad: fail),
             ),
             present: (ad, cb) {
-              ad.fullScreenContentCallback = FullScreenContentCallback<AppOpenAd>(
+              ad.fullScreenContentCallback =
+                  FullScreenContentCallback<AppOpenAd>(
                 onAdShowedFullScreenContent: (_) => cb.onShown(),
                 onAdDismissedFullScreenContent: (_) => cb.onDismissed(),
                 onAdFailedToShowFullScreenContent: (_, e) => cb.onFailed(e),
@@ -524,8 +562,12 @@ class _AppOpenObserver with WidgetsBindingObserver {
     if (pausedAt == null || core.fullScreenShowing) return;
     final suppressed = core.appOpenSuppressedUntil;
     if (suppressed != null && core.now().isBefore(suppressed)) return;
-    if (core.now().difference(pausedAt) < core.policy.appOpenMinBackground) return;
-    if (core.now().difference(core.gate.startedAt) < core.policy.launchGrace) return;
+    if (core.now().difference(pausedAt) < core.policy.appOpenMinBackground) {
+      return;
+    }
+    if (core.now().difference(core.gate.startedAt) < core.policy.launchGrace) {
+      return;
+    }
 
     SafeAds._appOpen?.ensureLoaded(reason: 'resume');
     unawaited(SafeAds.showAppOpen(placement: 'resume'));

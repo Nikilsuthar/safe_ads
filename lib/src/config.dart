@@ -2,7 +2,14 @@ import 'package:flutter/foundation.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 /// The ad formats AdMob offers.
-enum AdFormat { banner, native, interstitial, rewarded, rewardedInterstitial, appOpen }
+enum AdFormat {
+  banner,
+  native,
+  interstitial,
+  rewarded,
+  rewardedInterstitial,
+  appOpen
+}
 
 /// Your AdMob ad unit ids. Pass only the formats you use; the rest stay null
 /// and are simply never requested.
@@ -210,7 +217,8 @@ enum AdEventType {
 }
 
 class AdEvent {
-  AdEvent(this.type, this.format, {this.placement, this.detail}) : time = DateTime.now();
+  AdEvent(this.type, this.format, {this.placement, this.detail})
+      : time = DateTime.now();
 
   final AdEventType type;
 
@@ -251,11 +259,14 @@ class AdResult {
   /// The ad failed while showing (rare).
   final String? error;
 
-  const AdResult.shown({bool rewarded = false}) : this._(true, null, rewarded, null);
-  const AdResult.skipped(AdSkipReason reason) : this._(false, reason, false, null);
+  const AdResult.shown({bool rewarded = false})
+      : this._(true, null, rewarded, null);
+  const AdResult.skipped(AdSkipReason reason)
+      : this._(false, reason, false, null);
   const AdResult.failed(String error) : this._(false, null, false, error);
 
   @override
-  String toString() =>
-      shown ? 'AdResult(shown${rewarded ? ', rewarded' : ''})' : 'AdResult(skipped: ${skipReason?.name ?? error})';
+  String toString() => shown
+      ? 'AdResult(shown${rewarded ? ', rewarded' : ''})'
+      : 'AdResult(skipped: ${skipReason?.name ?? error})';
 }

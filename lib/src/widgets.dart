@@ -11,7 +11,8 @@ import 'safe_ads.dart';
 /// * a still-fresh ad from the previous visit is reused (see [AdPool]);
 /// * a failed load is retried a couple of times with back-off, then rests;
 /// * every request goes through the hourly request budget.
-abstract class _PooledAdState<W extends StatefulWidget, T extends AdWithView> extends State<W> {
+abstract class _PooledAdState<W extends StatefulWidget, T extends AdWithView>
+    extends State<W> {
   AdFormat get format;
   AdPool<T> get pool;
   String get placementLabel;
@@ -66,7 +67,9 @@ abstract class _PooledAdState<W extends StatefulWidget, T extends AdWithView> ex
     if (reused != null) {
       _ad = reused;
       setState(() => _loaded = true);
-      core.log(AdEventType.reused, format, placement: placementLabel, detail: 'showing the ad from the previous visit');
+      core.log(AdEventType.reused, format,
+          placement: placementLabel,
+          detail: 'showing the ad from the previous visit');
       onReady(reused, reused: true);
       return;
     }
@@ -78,7 +81,8 @@ abstract class _PooledAdState<W extends StatefulWidget, T extends AdWithView> ex
     if (id == null) return;
     final tracker = core.tracker('${format.name}:$_key');
     if (!tracker.canRequest()) {
-      core.log(AdEventType.blocked, format, placement: placementLabel, detail: 'waiting for back-off/rest');
+      core.log(AdEventType.blocked, format,
+          placement: placementLabel, detail: 'waiting for back-off/rest');
       return;
     }
     if (!core.acquireBudget(format, placementLabel)) return;
@@ -102,23 +106,31 @@ abstract class _PooledAdState<W extends StatefulWidget, T extends AdWithView> ex
       onFailed: (failed, error) {
         failed.dispose();
         if (identical(_ad, failed)) _ad = null;
-        core.log(AdEventType.failed, format, placement: placementLabel, detail: 'code ${error.code}: ${error.message}');
+        core.log(AdEventType.failed, format,
+            placement: placementLabel,
+            detail: 'code ${error.code}: ${error.message}');
         onLoadFailed(error);
         final delay = tracker.onFailure(fatal: error.code == 1);
         if (delay != null && mounted) {
           core.log(AdEventType.retryScheduled, format,
-              placement: placementLabel, detail: 'retry ${tracker.failures}/${core.policy.maxLoadRetries} in ${delay.inSeconds}s');
+              placement: placementLabel,
+              detail:
+                  'retry ${tracker.failures}/${core.policy.maxLoadRetries} in ${delay.inSeconds}s');
           _retryTimer?.cancel();
           _retryTimer = Timer(delay, () {
             if (mounted && !_loaded) _request(core);
           });
         } else if (delay == null) {
           core.log(AdEventType.gaveUp, format,
-              placement: placementLabel, detail: 'resting ${core.policy.giveUpCooldown.inSeconds}s; the next visit starts a new cycle');
+              placement: placementLabel,
+              detail:
+                  'resting ${core.policy.giveUpCooldown.inSeconds}s; the next visit starts a new cycle');
         }
       },
-      onClicked: () => core.log(AdEventType.clicked, format, placement: placementLabel),
-      onImpression: () => core.log(AdEventType.impression, format, placement: placementLabel),
+      onClicked: () =>
+          core.log(AdEventType.clicked, format, placement: placementLabel),
+      onImpression: () =>
+          core.log(AdEventType.impression, format, placement: placementLabel),
     );
     _ad = ad;
     ad.load();
@@ -128,7 +140,9 @@ abstract class _PooledAdState<W extends StatefulWidget, T extends AdWithView> ex
   void dispose() {
     _retryTimer?.cancel();
     final core = SafeAds.maybeCore;
-    if (_readyListener != null && core != null) core.ready.removeListener(_readyListener!);
+    if (_readyListener != null && core != null) {
+      core.ready.removeListener(_readyListener!);
+    }
     final ad = _ad;
     if (ad != null) {
       if (_loaded && _key != null) {
@@ -205,7 +219,8 @@ class _SafeBannerAdState extends _PooledAdState<SafeBannerAd, BannerAd> {
     final core = SafeAds.maybeCore;
     if (core == null || !core.config.enabled) return;
     _begun = true;
-    _placement = widget.placement ?? ModalRoute.of(context)?.settings.name ?? 'screen';
+    _placement =
+        widget.placement ?? ModalRoute.of(context)?.settings.name ?? 'screen';
     _resolveSize();
   }
 
@@ -214,7 +229,8 @@ class _SafeBannerAdState extends _PooledAdState<SafeBannerAd, BannerAd> {
     AdSize? size;
     switch (widget.size) {
       case BannerSize.adaptive:
-        size = await AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(width);
+        size = await AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(
+            width);
       case BannerSize.inlineAdaptive:
         size = AdSize.getCurrentOrientationInlineAdaptiveBannerAdSize(width);
       case BannerSize.banner:
@@ -281,7 +297,10 @@ class _SafeBannerAdState extends _PooledAdState<SafeBannerAd, BannerAd> {
     final isInline = widget.size == BannerSize.inlineAdaptive;
     final height = isInline ? (_height ?? 0) : ad.size.height.toDouble();
     if (height <= 0) return const SizedBox.shrink();
-    return SizedBox(width: ad.size.width.toDouble(), height: height, child: AdWidget(ad: ad));
+    return SizedBox(
+        width: ad.size.width.toDouble(),
+        height: height,
+        child: AdWidget(ad: ad));
   }
 }
 
@@ -355,7 +374,8 @@ class _SafeNativeAdState extends _PooledAdState<SafeNativeAd, NativeAd> {
     return NativeAd(
       adUnitId: unitId,
       request: request,
-      nativeTemplateStyle: widget.style ?? NativeTemplateStyle(templateType: widget.template),
+      nativeTemplateStyle:
+          widget.style ?? NativeTemplateStyle(templateType: widget.template),
       listener: NativeAdListener(
         onAdLoaded: onLoaded,
         onAdFailedToLoad: onFailed,
@@ -369,7 +389,8 @@ class _SafeNativeAdState extends _PooledAdState<SafeNativeAd, NativeAd> {
   }
 
   @override
-  void onReady(NativeAd ad, {required bool reused}) => widget.onLoaded?.call(true);
+  void onReady(NativeAd ad, {required bool reused}) =>
+      widget.onLoaded?.call(true);
 
   @override
   void onLoadFailed(LoadAdError error) {
@@ -381,7 +402,8 @@ class _SafeNativeAdState extends _PooledAdState<SafeNativeAd, NativeAd> {
   Widget build(BuildContext context) {
     final ad = this.ad;
     if (!isLoaded || ad == null) return const SizedBox.shrink();
-    final small = (widget.style?.templateType ?? widget.template) == TemplateType.small;
+    final small =
+        (widget.style?.templateType ?? widget.template) == TemplateType.small;
     return SizedBox(
       width: double.infinity,
       height: widget.height ?? (small ? 100 : 360),

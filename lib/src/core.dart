@@ -20,13 +20,16 @@ class AdStats {
   int shown(AdFormat f) => count(f, AdEventType.shown);
   int reused(AdFormat f) => count(f, AdEventType.reused);
 
-  int get totalRequests => AdFormat.values.fold(0, (sum, f) => sum + requests(f));
+  int get totalRequests =>
+      AdFormat.values.fold(0, (sum, f) => sum + requests(f));
 
   String summary() {
-    final buffer = StringBuffer('SafeAds stats (requests/loaded/failed/shown/reused):');
+    final buffer =
+        StringBuffer('SafeAds stats (requests/loaded/failed/shown/reused):');
     for (final f in AdFormat.values) {
       if (requests(f) + shown(f) + reused(f) == 0) continue;
-      buffer.write('\n  ${f.name.padRight(20)} ${requests(f)}/${loaded(f)}/${failed(f)}/${shown(f)}/${reused(f)}');
+      buffer.write(
+          '\n  ${f.name.padRight(20)} ${requests(f)}/${loaded(f)}/${failed(f)}/${shown(f)}/${reused(f)}');
     }
     return buffer.toString();
   }
@@ -40,7 +43,8 @@ class SafeAdsCore {
     ValueNotifier<bool>? readyNotifier,
     ValueNotifier<bool>? privacyNotifier,
   })  : policy = config.policy,
-        budget = RequestBudget(max: config.policy.maxRequestsPerHour, clock: clock),
+        budget =
+            RequestBudget(max: config.policy.maxRequestsPerHour, clock: clock),
         _clock = clock ?? DateTime.now,
         ready = readyNotifier ?? ValueNotifier(false),
         privacyOptionsRequired = privacyNotifier ?? ValueNotifier(false);
@@ -64,7 +68,8 @@ class SafeAdsCore {
   DateTime? appOpenSuppressedUntil;
 
   final Map<String, RetryTracker> _trackers = {};
-  final StreamController<AdEvent> _events = StreamController<AdEvent>.broadcast();
+  final StreamController<AdEvent> _events =
+      StreamController<AdEvent>.broadcast();
   final List<AdEvent> recentEvents = [];
 
   Stream<AdEvent> get events => _events.stream;
@@ -80,8 +85,9 @@ class SafeAdsCore {
         ),
       );
 
-  String? unitId(AdFormat format) =>
-      config.useTestIds ? AdIds.testIds().forFormat(format) : config.ids.forFormat(format);
+  String? unitId(AdFormat format) => config.useTestIds
+      ? AdIds.testIds().forFormat(format)
+      : config.ids.forFormat(format);
 
   AdRequest get request => config.request;
 
@@ -91,11 +97,13 @@ class SafeAdsCore {
   bool acquireBudget(AdFormat format, String? placement) {
     if (budget.tryAcquire()) return true;
     log(AdEventType.blocked, format,
-        placement: placement, detail: 'hourly request budget (${policy.maxRequestsPerHour}) used up');
+        placement: placement,
+        detail: 'hourly request budget (${policy.maxRequestsPerHour}) used up');
     return false;
   }
 
-  void log(AdEventType type, AdFormat? format, {String? placement, String? detail}) {
+  void log(AdEventType type, AdFormat? format,
+      {String? placement, String? detail}) {
     final event = AdEvent(type, format, placement: placement, detail: detail);
     if (format != null) stats.record(type, format);
     recentEvents.add(event);
@@ -132,7 +140,9 @@ class AdPool<T extends Ad> {
   /// Registers a freshly loaded ad that the caller is showing.
   void put(String key, T ad, DateTime now) {
     final old = _entries[key];
-    if (old != null && !identical(old.ad, ad) && !old.attached) old.ad.dispose();
+    if (old != null && !identical(old.ad, ad) && !old.attached) {
+      old.ad.dispose();
+    }
     _entries[key] = _PoolEntry(ad, now);
   }
 

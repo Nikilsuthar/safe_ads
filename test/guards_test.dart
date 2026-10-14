@@ -41,17 +41,21 @@ void main() {
           clock: c.call,
         );
 
-    test('a cycle is the first request plus two retries (30 s, 60 s), then it rests', () {
+    test(
+        'a cycle is the first request plus two retries (30 s, 60 s), then it rests',
+        () {
       final clock = FakeClock();
       final t = make(clock);
       expect(t.canRequest(), isTrue);
 
-      expect(t.onFailure(), const Duration(seconds: 30)); // failure 1 -> retry in 30 s
+      expect(t.onFailure(),
+          const Duration(seconds: 30)); // failure 1 -> retry in 30 s
       expect(t.canRequest(), isFalse);
       clock.advance(const Duration(seconds: 30));
       expect(t.canRequest(), isTrue);
 
-      expect(t.onFailure(), const Duration(seconds: 60)); // failure 2 -> retry in 60 s
+      expect(t.onFailure(),
+          const Duration(seconds: 60)); // failure 2 -> retry in 60 s
       clock.advance(const Duration(seconds: 60));
       expect(t.canRequest(), isTrue);
 
@@ -74,7 +78,8 @@ void main() {
       expect(t.onFailure(), const Duration(seconds: 30));
     });
 
-    test('a fatal error (invalid ad unit) rests 5x longer and never retries', () {
+    test('a fatal error (invalid ad unit) rests 5x longer and never retries',
+        () {
       final clock = FakeClock();
       final t = make(clock);
       expect(t.onFailure(fatal: true), isNull);
@@ -116,7 +121,8 @@ void main() {
       expect(g.check(), isNull);
     });
 
-    test('after showing: counter resets and a 2-minute cooldown applies', () async {
+    test('after showing: counter resets and a 2-minute cooldown applies',
+        () async {
       final clock = FakeClock();
       final g = make(clock, MemoryAdStorage());
       clock.advance(const Duration(minutes: 1));
@@ -140,7 +146,8 @@ void main() {
     test('session cap stops further interstitials', () async {
       final clock = FakeClock();
       final g = InterstitialGate(
-        policy: const AdPolicy(maxInterstitialsPerSession: 1, interstitialCooldown: Duration.zero),
+        policy: const AdPolicy(
+            maxInterstitialsPerSession: 1, interstitialCooldown: Duration.zero),
         storage: MemoryAdStorage(),
         clock: clock.call,
       );
@@ -165,9 +172,12 @@ void main() {
   });
 
   group('AdPool', () {
-    test('only constructed through real ads, so just check the age/attach contract of an empty pool', () {
+    test(
+        'only constructed through real ads, so just check the age/attach contract of an empty pool',
+        () {
       final pool = AdPool();
-      expect(pool.take('k', const Duration(minutes: 5), DateTime.now()), isNull);
+      expect(
+          pool.take('k', const Duration(minutes: 5), DateTime.now()), isNull);
       expect(pool.size, 0);
     });
   });
@@ -188,14 +198,18 @@ void main() {
       for (final platform in [TargetPlatform.android, TargetPlatform.iOS]) {
         final ids = AdIds.testIds(platform);
         for (final f in AdFormat.values) {
-          expect(ids.forFormat(f), startsWith('ca-app-pub-3940256099942544/'), reason: '$platform $f');
+          expect(ids.forFormat(f), startsWith('ca-app-pub-3940256099942544/'),
+              reason: '$platform $f');
         }
       }
     });
 
-    test('disabled SafeAds completes show calls immediately and still calls onFinished once', () async {
+    test(
+        'disabled SafeAds completes show calls immediately and still calls onFinished once',
+        () async {
       var finished = 0;
-      final result = await SafeAds.showInterstitial(onFinished: () => finished++);
+      final result =
+          await SafeAds.showInterstitial(onFinished: () => finished++);
       expect(result.shown, isFalse);
       expect(result.skipReason, AdSkipReason.disabled);
       expect(finished, 1);

@@ -22,7 +22,8 @@ class MemoryAdStorage implements AdStorage {
 /// Hard cap on ad requests per rolling window - the last line of defence that
 /// makes it impossible for a bug (or a navigation loop) to flood AdMob.
 class RequestBudget {
-  RequestBudget({required this.max, this.window = const Duration(hours: 1), Clock? clock})
+  RequestBudget(
+      {required this.max, this.window = const Duration(hours: 1), Clock? clock})
       : _clock = clock ?? _systemClock;
 
   final int max;
@@ -129,11 +130,16 @@ class InterstitialGate {
   /// Null when an interstitial may be shown, otherwise the reason it may not.
   AdSkipReason? check({int? minActions}) {
     final now = _clock();
-    if (now.difference(startedAt) < policy.launchGrace) return AdSkipReason.launchGrace;
-    if (shownThisSession >= policy.maxInterstitialsPerSession) return AdSkipReason.sessionCap;
+    if (now.difference(startedAt) < policy.launchGrace) {
+      return AdSkipReason.launchGrace;
+    }
+    if (shownThisSession >= policy.maxInterstitialsPerSession) {
+      return AdSkipReason.sessionCap;
+    }
     final lastMs = storage.getInt(lastShownKey);
     if (lastMs != 0 &&
-        now.difference(DateTime.fromMillisecondsSinceEpoch(lastMs)) < policy.interstitialCooldown) {
+        now.difference(DateTime.fromMillisecondsSinceEpoch(lastMs)) <
+            policy.interstitialCooldown) {
       return AdSkipReason.cooldown;
     }
     if (actions < (minActions ?? policy.minActionsBetweenInterstitials)) {

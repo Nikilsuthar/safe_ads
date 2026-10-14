@@ -41,7 +41,10 @@ class FullScreenSlot<T> {
   final SafeAdsCore core;
   final AdFormat format;
   final Duration maxAge;
-  final void Function(String unitId, AdRequest request, void Function(T ad) onLoaded,
+  final void Function(
+      String unitId,
+      AdRequest request,
+      void Function(T ad) onLoaded,
       void Function(LoadAdError error) onFailed) load;
   final Future<void> Function(T ad, ShowCallbacks callbacks) present;
   final void Function(T ad) disposeAd;
@@ -58,7 +61,8 @@ class FullScreenSlot<T> {
     if (core.now().difference(_loadedAt!) > maxAge) {
       disposeAd(_ad as T);
       _ad = null;
-      core.log(AdEventType.info, format, detail: 'cached ad expired, discarded');
+      core.log(AdEventType.info, format,
+          detail: 'cached ad expired, discarded');
       return false;
     }
     return true;
@@ -81,7 +85,8 @@ class FullScreenSlot<T> {
 
     final tracker = core.tracker('${format.name}:slot');
     if (!tracker.canRequest()) {
-      core.log(AdEventType.blocked, format, detail: 'waiting for back-off/rest ($reason)');
+      core.log(AdEventType.blocked, format,
+          detail: 'waiting for back-off/rest ($reason)');
       return;
     }
     if (!core.acquireBudget(format, null)) return;
@@ -97,17 +102,20 @@ class FullScreenSlot<T> {
         core.log(AdEventType.loaded, format);
       }, (error) {
         _loading = false;
-        core.log(AdEventType.failed, format, detail: 'code ${error.code}: ${error.message}');
+        core.log(AdEventType.failed, format,
+            detail: 'code ${error.code}: ${error.message}');
         // Code 1 = invalid request (e.g. a wrong ad unit id): retrying cannot help.
         final delay = tracker.onFailure(fatal: error.code == 1);
         if (delay != null) {
           core.log(AdEventType.retryScheduled, format,
-              detail: 'retry ${tracker.failures}/${core.policy.maxLoadRetries} in ${delay.inSeconds}s');
+              detail:
+                  'retry ${tracker.failures}/${core.policy.maxLoadRetries} in ${delay.inSeconds}s');
           _timer?.cancel();
           _timer = Timer(delay, () => ensureLoaded(reason: 'retry'));
         } else {
           core.log(AdEventType.gaveUp, format,
-              detail: 'resting ${core.policy.giveUpCooldown.inSeconds}s before a new cycle');
+              detail:
+                  'resting ${core.policy.giveUpCooldown.inSeconds}s before a new cycle');
         }
       });
     } catch (e) {

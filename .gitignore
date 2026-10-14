@@ -10,3 +10,5 @@ example/android/local.properties
 example/android/key.properties
 *.iml
 .idea/
+.flutter-plugins
+.flutter-plugins-dependencies

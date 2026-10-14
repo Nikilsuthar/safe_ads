@@ -1,8 +1,7 @@
 name: safe_ads
 description: >-
-  One safe, reusable AdMob layer for Flutter apps: banner, native, interstitial,
-  rewarded, rewarded interstitial and app-open ads with built-in consent (UMP),
-  request budgets, capped retries, cooldowns, banner reuse and ad logging.
+  Safe AdMob ads for Flutter: banner, native, interstitial, rewarded and
+  app-open with consent, capped retries, request limits and banner reuse.
 version: 0.1.0
 repository: https://github.com/Nikilsuthar/safe_ads
 issue_tracker: https://github.com/Nikilsuthar/safe_ads/issues
@@ -20,7 +19,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  google_mobile_ads: ^5.3.1
+  google_mobile_ads: '>=5.3.1 <7.0.0'
   shared_preferences: ^2.3.3
 
 dev_dependencies:

@@ -24,7 +24,8 @@ class ConsentManager {
 
   static Future<bool> privacyOptionsRequired() async {
     try {
-      final status = await ConsentInformation.instance.getPrivacyOptionsRequirementStatus();
+      final status = await ConsentInformation.instance
+          .getPrivacyOptionsRequirementStatus();
       return status == PrivacyOptionsRequirementStatus.required;
     } catch (_) {
       return false;

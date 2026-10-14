@@ -31,7 +31,29 @@ Android: add your **AdMob app id** to `AndroidManifest.xml` (inside
            android:value="ca-app-pub-3940256099942544~3347511713"/>
 ```
 
-Android 13+: keep `INTERNET` permission. Android SDK min 24 is recommended.
+Android: keep the `INTERNET` permission (added by the example). Use `minSdk` 23 or higher
+(`google_mobile_ads` requires it; 24+ is recommended).
+
+### iOS setup (one time, in the app that uses the package)
+
+Add to `ios/Runner/Info.plist` (replace with your iOS **AdMob app id**; Google's test id shown):
+
+```xml
+<key>GADApplicationIdentifier</key>
+<string>ca-app-pub-3940256099942544~1458002511</string>
+<key>SKAdNetworkItems</key>
+<array>
+  <dict><key>SKAdNetworkIdentifier</key><string>cstr6suwn9.skadnetwork</string></dict>
+</array>
+```
+
+Google lists the full SKAdNetwork id list in its
+[iOS quick start](https://developers.google.com/admob/ios/quick-start#update_your_infoplist). Use iOS 13 or newer.
+If your app tracks users across apps, also add `NSUserTrackingUsageDescription` and request App Tracking
+Transparency before `SafeAds.init`. The consent (UMP) form is handled by the package.
+
+> Tested on Android with Google test ads. iOS uses the same Dart code and Google's iOS test ad units, but it has
+> not been run on a device by the author.
 
 ## Quick start
 
