@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>safe_ads - Complete Guide</title>
+<style>
+@page { size: A4; margin: 16mm 14mm; }
+* { box-sizing: border-box; }
+body { font-family: "Segoe UI", "Nirmala UI", Arial, sans-serif; color: #1b1b2f; font-size: 11.2pt; line-height: 1.5; margin: 0; }
+h1 { font-size: 28pt; margin: 0 0 4px; color: #3b2fc9; }
+h2 { font-size: 17pt; color: #3b2fc9; border-bottom: 3px solid #fbbf24; padding-bottom: 4px; margin: 26px 0 10px; page-break-after: avoid; }
+h3 { font-size: 12.5pt; margin: 16px 0 4px; color: #2a2a55; page-break-after: avoid; }
+p { margin: 6px 0; }
+.sub { color: #555; font-size: 12pt; margin-bottom: 14px; }
+.hi { background: #fff7e0; border-left: 5px solid #fbbf24; padding: 7px 12px; margin: 8px 0; border-radius: 4px; font-size: 10.6pt; }
+.warn { background: #ffecec; border-left: 5px solid #e11d48; padding: 7px 12px; margin: 8px 0; border-radius: 4px; }
+.ok { background: #e8f8ef; border-left: 5px solid #16a34a; padding: 7px 12px; margin: 8px 0; border-radius: 4px; }
+table { border-collapse: collapse; width: 100%; margin: 8px 0; font-size: 10.2pt; page-break-inside: avoid; }
+th { background: #3b2fc9; color: #fff; text-align: left; padding: 6px 8px; }
+td { border: 1px solid #d8d8ea; padding: 6px 8px; vertical-align: top; }
+tr:nth-child(even) td { background: #f6f6fd; }
+code, pre { font-family: Consolas, "Courier New", monospace; }
+code { background: #eef0ff; padding: 1px 5px; border-radius: 4px; font-size: 9.6pt; }
+pre { background: #14142b; color: #e8e8ff; padding: 10px 12px; border-radius: 8px; font-size: 8.8pt; line-height: 1.4; overflow: hidden; white-space: pre-wrap; page-break-inside: avoid; }
+.flow { display: flex; align-items: center; gap: 6px; margin: 10px 0; flex-wrap: wrap; page-break-inside: avoid; }
+.box { background: #eef0ff; border: 2px solid #3b2fc9; border-radius: 10px; padding: 7px 10px; font-size: 9.6pt; text-align: center; font-weight: 600; }
+.box.y { background: #fff3c4; border-color: #f59e0b; }
+.box.g { background: #dcf7e6; border-color: #16a34a; }
+.box.r { background: #ffe1e6; border-color: #e11d48; }
+.arrow { font-size: 15pt; color: #3b2fc9; }
+.cover { text-align: center; padding: 70px 20px 40px; page-break-after: always; }
+.cover h1 { font-size: 46pt; }
+.cover .tag { display: inline-block; background: #fbbf24; color: #2a1b00; font-weight: 700; padding: 6px 18px; border-radius: 30px; margin-top: 18px; }
+.pb { page-break-before: always; }
+.cols { display: flex; gap: 12px; } .cols > div { flex: 1; }
+ul { margin: 4px 0 4px 20px; padding: 0; } li { margin: 3px 0; }
+.small { font-size: 9.4pt; color: #555; }
+.hindi { font-family: "Nirmala UI", sans-serif; }
+</style>
+</head>
+<body>
+
+<div class="cover">
+  <h1>safe_ads</h1>
+  <p class="sub">A safe, reusable AdMob layer for Flutter apps<br>Complete guide for the developer (Nikhil D Suthar)</p>
+  <div class="tag">Version 0.1.0 &middot; published on pub.dev</div>
+  <p style="margin-top:46px" class="hindi">इस गाइड में आसान भाषा में बताया गया है कि पैकेज क्या है, कैसे बना,<br>कैसे काम करता है, और किसी भी ऐप में कैसे इस्तेमाल करना है।</p>
+  <p class="small" style="margin-top:50px">pub.dev/packages/safe_ads &nbsp;|&nbsp; github.com/Nikilsuthar/safe_ads</p>
+</div>
+
+<h2>1. What is this package, in one minute</h2>
+<p><b>Before:</b> every app needed its own ad code: ask AdMob for an ad, wait, handle failures, retry, ask for consent, don't show too many ads... Writing this again and again in every project is slow, and small mistakes can hurt your AdMob account (too many requests, ads too often, accidental extra requests when the user moves between screens).</p>
+<p><b>Now:</b> all of that lives in <b>one package</b>, <code>safe_ads</code>. In any app you write about 10 lines: give your ad unit ids, put a banner widget on a screen, and call one function where you want a full-screen ad. The package handles everything else, with <b>safe defaults</b>.</p>
+<div class="hi class hindi"><b>सरल भाषा में:</b> पैकेज = एक तैयार टूलबॉक्स। हर ऐप में विज्ञापन का कोड दोबारा लिखने की जरूरत नहीं। आप सिर्फ ID देते हैं और फंक्शन बुलाते हैं; बार-बार रिक्वेस्ट, फेल होने पर रिट्राई, कंसेंट, गैप — सब पैकेज खुद संभालता है।</div>
+
+<h3>Where your own app code changed (QRiva)</h3>
+<table>
+<tr><th>Before</th><th>After</th></tr>
+<tr><td>~300 lines of ad code inside QRiva (<code>AdService</code>, <code>InterstitialAdManager</code>, <code>BannerAdWidget</code>)</td><td>Deleted. QRiva only calls <code>SafeAds.init</code>, <code>SafeBannerAd</code>, <code>SafeAds.registerAction</code>, <code>SafeAds.showInterstitial</code></td></tr>
+<tr><td>Fix a bug = fix it in every app</td><td>Fix once in the package, update the version in all apps</td></tr>
+</table>
+
+<h2>2. What a "request" is, and the words you will meet</h2>
+<table>
+<tr><th>Word</th><th>Meaning (simple)</th></tr>
+<tr><td><b>Ad unit id</b></td><td>A code like <code>ca-app-pub-123.../456...</code> from your AdMob dashboard. One id per ad placement/format. It tells AdMob which of your ad slots is asking.</td></tr>
+<tr><td><b>AdMob app id</b></td><td>The id of your whole app (<code>ca-app-pub-123~456</code>). It goes into <code>AndroidManifest.xml</code> / <code>Info.plist</code>, not into Dart code.</td></tr>
+<tr><td><b>Ad request</b></td><td>Your app <i>asks</i> AdMob's server: "give me an ad for this ad unit". It costs nothing but it is counted. Too many requests with few ads actually shown = low <b>match rate</b>.</td></tr>
+<tr><td><b>Load / Loaded</b></td><td>AdMob answered with an ad and the phone received it. The ad is now <i>ready</i> but not yet visible.</td></tr>
+<tr><td><b>Fill / No fill</b></td><td>"No fill" = AdMob had no ad to give for that request (normal for new apps, error code 3). It is not an error in your code.</td></tr>
+<tr><td><b>Impression</b></td><td>The ad was actually <b>shown</b> on screen. This is what earns money (together with clicks).</td></tr>
+<tr><td><b>Match rate</b></td><td>Ads delivered &divide; requests made. Wasteful requests lower it.</td></tr>
+<tr><td><b>Invalid traffic</b></td><td>Clicks/impressions Google believes are fake (the owner or friends tapping ads, bots). This can disable your AdMob account. <b>Never tap your own ads</b>; use test ads.</td></tr>
+<tr><td><b>Test ads</b></td><td>Google's special ad units that always return dummy ads (label "Test Ad"). Safe to tap. Use them while developing.</td></tr>
+<tr><td><b>Consent (UMP)</b></td><td>In Europe/UK the law requires asking permission before personalised ads. Google's form does this. It must be shown <i>before</i> ads are requested.</td></tr>
+<tr><td><b>Cooldown</b></td><td>A minimum waiting time between two full-screen ads.</td></tr>
+<tr><td><b>Back-off</b></td><td>Waiting a little longer after each failure before trying again (30 s, then 60 s).</td></tr>
+</table>
+
+<h2 class="pb">3. The six ad types, and what each needs</h2>
+<table>
+<tr><th>Type</th><th>What the user sees</th><th>Ad unit id needed</th><th>How you use it in code</th></tr>
+<tr><td><b>Banner</b></td><td>A strip at the bottom/top of a screen. Always visible while on the screen.</td><td><code>banner</code></td><td><code>SafeBannerAd(placement: 'home')</code></td></tr>
+<tr><td><b>Native</b></td><td>An ad styled like content (image, title, button) inside a list/screen.</td><td><code>native</code></td><td><code>SafeNativeAd(placement: 'feed')</code></td></tr>
+<tr><td><b>Interstitial</b></td><td>Full-screen ad at a natural pause (after saving a QR, finishing a level).</td><td><code>interstitial</code></td><td><code>SafeAds.showInterstitial(onFinished: ...)</code></td></tr>
+<tr><td><b>Rewarded</b></td><td>Full-screen video the user <i>chooses</i> to watch to get a reward (coins, a hint).</td><td><code>rewarded</code></td><td><code>SafeAds.showRewarded(onReward: ...)</code></td></tr>
+<tr><td><b>Rewarded interstitial</b></td><td>Like interstitial, but gives a reward; user is told first.</td><td><code>rewardedInterstitial</code></td><td><code>SafeAds.showRewardedInterstitial(...)</code></td></tr>
+<tr><td><b>App open</b></td><td>Full-screen ad when the user returns to the app from the background.</td><td><code>appOpen</code></td><td>automatic with <code>appOpenEnabled: true</code></td></tr>
+</table>
+
+<h3>What every app needs (checklist)</h3>
+<ol>
+<li>An AdMob account, an app in it, and one <b>ad unit per format</b> you use.</li>
+<li>The <b>AdMob app id</b> in <code>AndroidManifest.xml</code> (and <code>Info.plist</code> for iOS). A wrong format here crashes the app at start.</li>
+<li><code>INTERNET</code> permission (Android).</li>
+<li>The package in <code>pubspec.yaml</code>: <code>safe_ads: ^0.1.0</code>.</li>
+<li>In Play Console: declare "contains ads", the Advertising ID, and the AdMob data in Data safety. Publish a privacy policy.</li>
+<li>Use <b>test ids</b> while testing (<code>useTestIds: true</code>).</li>
+</ol>
+
+<h2>4. How a developer uses it (the complete example)</h2>
+<pre>// pubspec.yaml
+dependencies:
+  safe_ads: ^0.1.0
+
+// main.dart
+await SafeAds.init(const SafeAdsConfig(
+  ids: AdIds(
+    banner:       'ca-app-pub-XXXX/1111111111',
+    interstitial: 'ca-app-pub-XXXX/2222222222',
+    rewarded:     'ca-app-pub-XXXX/3333333333',
+  ),
+  useTestIds: kDebugMode,                // test ads in debug builds
+  autoPreload: {AdFormat.interstitial},  // load one in advance
+));
+runApp(const MyApp());
+
+// any screen: a banner
+bottomNavigationBar: const SafeBannerAd(placement: 'home'),
+
+// after the user finished something
+await SafeAds.registerAction();
+await SafeAds.showInterstitial(
+  placement: 'saved',
+  onFinished: () =&gt; Navigator.push(...),   // runs ALWAYS, exactly once
+);
+
+// rewarded: user taps "Watch ad for a hint"
+await SafeAds.showRewarded(
+  onReward: (reward) =&gt; giveHint(),
+  onNotAvailable: () =&gt; toast('Try again in a moment'),
+);</pre>
+<div class="ok"><b>Important:</b> <code>onFinished</code> runs after the ad closes <i>or immediately if no ad was shown</i>. So your navigation always continues &mdash; the user is never stuck because an ad failed.</div>
+
+<h2 class="pb">5. The safety rules (what the package does for you)</h2>
+<p>All numbers can be changed with <code>AdPolicy</code>; the defaults are deliberately cautious.</p>
+<table>
+<tr><th>Rule</th><th>Default</th><th>Why it exists</th></tr>
+<tr><td><b>Retries after a failed load</b></td><td>1 try + 2 retries (after <b>30 s</b>, then <b>60 s</b>) = <b>3 requests</b> max</td><td>A failure is usually "no ad now". Hammering AdMob doesn't help and lowers match rate.</td></tr>
+<tr><td><b>Rest after giving up</b></td><td><b>2 minutes</b> (10 min if the ad unit id itself is invalid)</td><td>Stops endless loops. A new screen visit or user action later starts a fresh cycle.</td></tr>
+<tr><td><b>Hourly request cap</b></td><td><b>120 requests per hour</b> for the whole app</td><td>A safety net: even if a bug or fast navigation causes loops, requests can never explode.</td></tr>
+<tr><td><b>Banner / native reuse</b></td><td>Re-shown for <b>5 minutes</b> when you leave and come back</td><td>No new request on every visit. After 5 minutes it is considered old and a fresh one is requested.</td></tr>
+<tr><td><b>Interstitial pacing</b></td><td>After <b>2 completed actions</b>, <b>2 min</b> cooldown, not in the first <b>45 s</b>, max <b>10 per session</b>, never two at once</td><td>Google's ad-placement policy: ads at natural breaks, never spammy. Protects users and your account.</td></tr>
+<tr><td><b>"1 hour discard" for full-screen ads</b></td><td>A loaded interstitial/rewarded ad older than <b>55 minutes</b> is thrown away and a new one loaded</td><td>AdMob stops accepting full-screen ads about <b>1 hour</b> after loading. Showing an expired ad fails. So the package discards it before that, and loads a new one.</td></tr>
+<tr><td><b>App-open ad</b></td><td>Off by default. If on: after 30 s in background, 5 min between ads, not right after another ad</td><td>Avoids ads after a permission dialog or share sheet, which would annoy users.</td></tr>
+<tr><td><b>Counters survive restart</b></td><td>Saved with <code>shared_preferences</code></td><td>Closing and reopening the app can't be used to bypass the cooldown.</td></tr>
+</table>
+
+<h3>Flow of one full-screen ad (interstitial)</h3>
+<div class="flow">
+<div class="box">App starts</div><div class="arrow">&rarr;</div>
+<div class="box y">Consent (EU/UK only)</div><div class="arrow">&rarr;</div>
+<div class="box">Ads SDK starts</div><div class="arrow">&rarr;</div>
+<div class="box">Load 1 ad in advance</div>
+</div>
+<div class="flow">
+<div class="box g">User completes an action</div><div class="arrow">&rarr;</div>
+<div class="box">registerAction()</div><div class="arrow">&rarr;</div>
+<div class="box y">Rules OK?<br><small>45 s &middot; 2 actions &middot; 2 min &middot; cap</small></div><div class="arrow">&rarr;</div>
+<div class="box g">Show ad</div><div class="arrow">&rarr;</div>
+<div class="box">Close &rarr; onFinished() &rarr; load next</div>
+</div>
+<div class="flow">
+<div class="box r">Rules say no / ad not ready</div><div class="arrow">&rarr;</div>
+<div class="box">Skip quietly</div><div class="arrow">&rarr;</div>
+<div class="box">onFinished() runs immediately</div>
+</div>
+
+<h3>Flow when loading fails</h3>
+<div class="flow">
+<div class="box">Request #1</div><div class="arrow">&rarr;</div><div class="box r">fails</div><div class="arrow">&rarr;</div>
+<div class="box y">wait 30 s</div><div class="arrow">&rarr;</div><div class="box">Request #2</div><div class="arrow">&rarr;</div><div class="box r">fails</div><div class="arrow">&rarr;</div>
+<div class="box y">wait 60 s</div><div class="arrow">&rarr;</div><div class="box">Request #3</div><div class="arrow">&rarr;</div><div class="box r">fails</div><div class="arrow">&rarr;</div>
+<div class="box r">GIVE UP &middot; rest 2 min</div>
+</div>
+<p class="small">During the rest, nothing is requested. This was proven on a real phone: with wrong ad ids, each slot made exactly 3 requests and then stopped.</p>
+
+<h3>Banner on screens</h3>
+<div class="flow">
+<div class="box">Open Screen A</div><div class="arrow">&rarr;</div><div class="box y">1 request &rarr; loaded</div><div class="arrow">&rarr;</div>
+<div class="box">Leave &amp; come back (&lt; 5 min)</div><div class="arrow">&rarr;</div><div class="box g">same ad, 0 requests</div>
+</div>
+<p><b>Rebuilding</b> a screen (setState, theme change) never requests an ad. Only a <b>new visit</b> can, and only if there is no fresh ad to reuse.</p>
+
+<h2 class="pb">6. How the package was built</h2>
+<h3>Structure</h3>
+<table>
+<tr><th>File</th><th>Job</th></tr>
+<tr><td><code>lib/safe_ads.dart</code></td><td>The public door. Exports only what developers should use.</td></tr>
+<tr><td><code>src/config.dart</code></td><td>Settings classes: <code>SafeAdsConfig</code>, <code>AdIds</code> (incl. Google's test ids), <code>AdPolicy</code> (all the numbers), events and results.</td></tr>
+<tr><td><code>src/guards.dart</code></td><td>Pure safety logic: <code>RequestBudget</code> (120/hour), <code>RetryTracker</code> (3 tries then rest), <code>InterstitialGate</code> (cooldown/actions). No ads here, so it is easy to unit-test.</td></tr>
+<tr><td><code>src/core.dart</code></td><td>Shared state: logging, statistics, the ready flag, <code>AdPool</code> (keeps banners for reuse).</td></tr>
+<tr><td><code>src/consent.dart</code></td><td>Google's consent (UMP) flow with time limits so a slow network can never freeze the app.</td></tr>
+<tr><td><code>src/full_screen.dart</code></td><td>One "slot" that preloads a full-screen ad, retries, expires old ads and hands it over to show.</td></tr>
+<tr><td><code>src/safe_ads.dart</code></td><td>The <code>SafeAds</code> class: <code>init</code>, <code>showInterstitial</code>, <code>showRewarded</code>, ... and the app-open observer.</td></tr>
+<tr><td><code>src/widgets.dart</code></td><td><code>SafeBannerAd</code> and <code>SafeNativeAd</code> widgets (reuse + retry + budget).</td></tr>
+<tr><td><code>src/prefs_storage.dart</code></td><td>Saves the counters between app runs.</td></tr>
+<tr><td><code>example/</code></td><td>A test-bench app with a button for every ad type and a live log.</td></tr>
+<tr><td><code>test/</code></td><td>16 unit tests for the safety rules.</td></tr>
+</table>
+
+<h3>What it uses from other packages</h3>
+<table>
+<tr><th>Package</th><th>Used for</th></tr>
+<tr><td><b>google_mobile_ads</b> (by Google)</td><td>The real work of talking to AdMob: <code>BannerAd</code>, <code>InterstitialAd</code>, <code>RewardedAd</code>, <code>NativeAd</code>, <code>AppOpenAd</code>, and the consent classes. <code>safe_ads</code> <i>wraps</i> it &mdash; it adds rules and safety on top, it does not replace it. (Versions 5.3.1 to 6.x.)</td></tr>
+<tr><td><b>shared_preferences</b></td><td>Remember the action counter and the time of the last interstitial.</td></tr>
+<tr><td><b>flutter</b> (SDK)</td><td>Widgets, <code>ValueNotifier</code>, app life-cycle (for app-open ads).</td></tr>
+</table>
+<div class="hi">Nothing is copied from another package's code. <code>safe_ads</code> is an <b>unofficial wrapper</b>; Google's package does the ad delivery. The README says it is not affiliated with Google.</div>
+
+<h3>Design decisions (why it is "safe")</h3>
+<ul>
+<li><b>Never throws, never blocks.</b> Ad failures are logged and ignored; the app keeps working.</li>
+<li><b>One entry point</b> (<code>SafeAds</code>) so rules cannot be bypassed by calling the ad SDK from random places.</li>
+<li><b>Everything is counted</b> (stats + events) so you can <i>see</i> what happened.</li>
+<li><b>Guards are separate from ads</b> so the rules can be unit-tested without a phone.</li>
+<li><b>Clock injection</b> in the guard classes lets tests move time forward without waiting.</li>
+</ul>
+
+<h2 class="pb">7. How to check that it works (logs)</h2>
+<p>In debug builds every event is printed. Filter with:</p>
+<pre>adb logcat -s flutter | findstr SafeAds</pre>
+<table>
+<tr><th>Log line</th><th>Meaning</th></tr>
+<tr><td><code>request banner @home</code></td><td>The app asked AdMob for a banner for the screen "home".</td></tr>
+<tr><td><code>loaded banner @home</code></td><td>An ad arrived and is ready/visible.</td></tr>
+<tr><td><code>impression banner @home</code></td><td>The ad was actually shown.</td></tr>
+<tr><td><code>reused banner @home - showing the ad from the previous visit</code></td><td>No new request; the previous ad was shown again.</td></tr>
+<tr><td><code>failed ... code 3: No fill</code></td><td>AdMob had no ad right now (normal).</td></tr>
+<tr><td><code>retryScheduled ... retry 1/2 in 30s</code></td><td>First automatic retry planned.</td></tr>
+<tr><td><code>gaveUp ... resting 120s</code></td><td>3 attempts used; the slot rests, no more requests for 2 minutes.</td></tr>
+<tr><td><code>skipped interstitial - notEnoughActions / cooldown / launchGrace</code></td><td>A rule blocked the interstitial (this is correct behaviour).</td></tr>
+<tr><td><code>blocked ... hourly request budget</code></td><td>The 120-per-hour cap was reached.</td></tr>
+<tr><td><code>reward rewarded - 10 coins</code></td><td>The user earned the reward.</td></tr>
+</table>
+<p>In code: <code>SafeAds.stats.summary()</code> prints requests / loaded / failed / shown / reused per format; <code>SafeAds.events</code> is a live stream; <code>SafeAds.recentEvents</code> gives the last 300 events for a debug screen.</p>
+
+<h3>What was tested on a real phone (Moto G51, Google test ads)</h3>
+<table>
+<tr><th>Test</th><th>Result</th></tr>
+<tr><td>All 6 formats load and show</td><td>Passed</td></tr>
+<tr><td>Interstitial with 0 actions</td><td>Skipped (<code>notEnoughActions</code>), <code>onFinished</code> still ran</td></tr>
+<tr><td>Interstitial after 2 actions</td><td>Shown, next one preloaded after closing</td></tr>
+<tr><td>Interstitial again within the cooldown, even after restarting the app</td><td>Blocked (<code>cooldown</code>)</td></tr>
+<tr><td>Rewarded and rewarded interstitial</td><td>Shown, reward "10 coins" granted</td></tr>
+<tr><td>App-open ad</td><td>Shown</td></tr>
+<tr><td>3 visits to a banner screen</td><td>1 request + 2 reuses</td></tr>
+<tr><td>Wrong ad ids</td><td>Exactly 3 requests per slot, then rest, then nothing</td></tr>
+<tr><td>QRiva using the package</td><td>Banner + interstitial worked; 3 visits = 1 request</td></tr>
+</table>
+<div class="warn"><b>Not tested:</b> iOS on a real iPhone (no Mac available). The Dart code is shared and iOS uses Google's documented test ids, but it has not been run there. A native-ad test creative shows a cosmetic Google debug warning.</div>
+
+<h2>8. Staying safe with your AdMob account</h2>
+<ul>
+<li><b>Never tap your own real ads</b> &mdash; not even once "to check". Use <code>useTestIds: true</code> or add your phone to <code>testDeviceIds</code>.</li>
+<li>Do not ask friends/testers to tap ads. Their normal accidental taps are fine; organised tapping is not.</li>
+<li>Don't put banners next to buttons people tap often; don't show interstitials at app launch, on exit or in the middle of a task.</li>
+<li>New apps show few ads at first (AdMob "Getting ready" review takes days) &mdash; that is normal and not a bug.</li>
+<li>Keep ads declared in Play Console (ads, Advertising ID, Data safety) and keep your privacy policy online.</li>
+</ul>
+
+<h2>9. Using it in another project (step by step)</h2>
+<ol>
+<li>Add <code>safe_ads: ^0.1.0</code> to <code>pubspec.yaml</code> and run <code>flutter pub get</code>.</li>
+<li>In AdMob create the ad units you need; copy the <b>app id</b> and <b>ad unit ids</b>.</li>
+<li>Put the app id in <code>AndroidManifest.xml</code> (<code>com.google.android.gms.ads.APPLICATION_ID</code>) and, for iOS, <code>GADApplicationIdentifier</code> in <code>Info.plist</code>.</li>
+<li>Call <code>SafeAds.init(...)</code> once in <code>main()</code> (use test ids while developing).</li>
+<li>Add <code>SafeBannerAd</code> where a banner should appear; call <code>registerAction</code> + <code>showInterstitial</code> at natural breaks.</li>
+<li>Run the app, watch the logs, then switch to real ids for your release build.</li>
+<li>Before release: Play Console declarations, privacy policy, and a Europe consent message in AdMob (Privacy &amp; messaging).</li>
+</ol>
+
+<h2>10. About pub.dev</h2>
+<ul>
+<li>The package is live at <b>pub.dev/packages/safe_ads</b> (version 0.1.0). Its score is 150 of 160 points.</li>
+<li><b>Why it may not appear in a list/search page yet:</b> pub.dev search ranks by relevance, <i>likes</i>, <i>popularity (downloads)</i> and score. A brand-new package has 0 likes and 0 downloads, so it sits far down general searches like "admob". Searching its exact name <code>safe_ads</code> does find it. Visibility grows with likes and downloads, and the search index also updates with a delay of hours to a day.</li>
+<li>A published version can never be deleted; to change anything, publish a new version (0.1.1, 0.2.0...).</li>
+</ul>
+<h3>Releasing an update</h3>
+<ol>
+<li>Change the code, raise <code>version:</code> in pubspec.yaml, add a line to CHANGELOG.md.</li>
+<li><code>flutter analyze</code> &rarr; <code>flutter test</code> &rarr; <code>flutter pub publish --dry-run</code> &rarr; <code>flutter pub publish</code>.</li>
+<li>In each app: change <code>safe_ads: ^0.1.0</code> to the new version and run <code>flutter pub get</code>.</li>
+</ol>
+
+<h2>11. Quick glossary in Hindi</h2>
+<table class="hindi">
+<tr><th>शब्द</th><th>मतलब</th></tr>
+<tr><td>Ad request</td><td>ऐप का AdMob से विज्ञापन माँगना। ज़्यादा माँगना और कम दिखाना = खराब match rate।</td></tr>
+<tr><td>Impression</td><td>विज्ञापन सच में स्क्रीन पर दिखा। कमाई यहीं से होती है।</td></tr>
+<tr><td>No fill</td><td>AdMob के पास अभी दिखाने को विज्ञापन नहीं था — सामान्य बात है।</td></tr>
+<tr><td>Cooldown</td><td>दो full-screen विज्ञापनों के बीच कम से कम इतना इंतज़ार।</td></tr>
+<tr><td>Retry / Back-off</td><td>फेल होने पर थोड़ी देर रुककर दोबारा कोशिश (30 सेकंड, फिर 60 सेकंड), फिर बंद।</td></tr>
+<tr><td>1 घंटे वाला discard</td><td>लोड हुआ full-screen विज्ञापन करीब 1 घंटे बाद expire हो जाता है, इसलिए 55 मिनट बाद पैकेज उसे हटाकर नया लोड करता है।</td></tr>
+<tr><td>Hourly cap</td><td>एक घंटे में अधिकतम 120 रिक्वेस्ट — लूप या बग से अकाउंट को बचाने की सुरक्षा।</td></tr>
+<tr><td>Test ads</td><td>Google के नकली विज्ञापन, जिन पर टैप करना सुरक्षित है।</td></tr>
+<tr><td>Invalid traffic</td><td>अपने या दोस्तों के नकली क्लिक — इससे AdMob अकाउंट बंद हो सकता है।</td></tr>
+</table>
+
+<p class="small" style="margin-top:30px">Generated for Nikhil D Suthar &middot; safe_ads 0.1.0 &middot; MIT license &middot; unofficial wrapper around google_mobile_ads, not affiliated with Google.</p>
+</body>
+</html>
